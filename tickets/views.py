@@ -56,7 +56,7 @@ def solicitar_acceso(request):
             print("="*50)
             print(f"🔑 CÓDIGO DE ACCESO GENERADO: {codigo}")
             print("="*50)
-
+            
             request.session['otp_codigo'] = codigo
             request.session['otp_email'] = email
             
@@ -72,6 +72,11 @@ def solicitar_acceso(request):
                 print(f"Error enviando mail: {e}")
             
             return redirect('validar_codigo')
+            
+    else:
+        form = SolicitudAccesoForm()
+    
+    return render(request, 'tickets/login.html', {'form': form})
 
 def validar_codigo(request):
     if 'otp_email' not in request.session:
@@ -114,7 +119,6 @@ def crear_queja(request):
             ticket.save()
             
             verificar_alertas(ticket)
-            
             
             return redirect('pagina_exito')
     else:
