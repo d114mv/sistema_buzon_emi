@@ -4,30 +4,73 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
-from .forms import TicketForm, SolicitudAccesoForm, ValidarCodigoForm
 from django.db.models import Count 
 from .models import Ticket
+from .forms import TicketForm, SolicitudAccesoForm, ValidarCodigoForm
 
 PALABRAS_CLAVE = ['robo', 'fuego', 'incendio', 'acoso', 'golpe', 'sangre', 'amenaza', 'urgente']
+
+
+def generar_hash_anonimo(identificador):
+    salt = settings.SECRET_KEY
+    texto_a_hashear = f"{identificador}{salt}"
+    return hashlib.sha256(texto_a_hashear.encode('utf-8')).hexdigest()
+
+def verificar_alertas(ticket):
+    texto_completo = f"{ticket.asunto} {ticket.descripcion}".lower()
+    
+    if any(palabra in texto_completo for palabra in PALABRAS_CLAVE):
+        destinatario = ticket.categoria.email_responsable
+        if not destinatario:
+            destinatario = 'admin@emi.edu.bo'
+            
+        print(f"⚠️ ALERTA DETECTADA: Enviando correo a {destinatario}...")
+        
+        send_mail(
+            subject=f'ALERTA URGENTE: {ticket.categoria.nombre} - {ticket.asunto}',
+            message=f"""
+            SE HA REPORTADO UN INCIDENTE CRÍTICO.
+            
+            Categoría: {ticket.categoria.nombre}
+            Prioridad Detectada: MÁXIMA
+            
+            Descripción:
+            {ticket.descripcion}
+            
+            -------------------------------------
+            Este es un mensaje automático del Sistema de Buzón EMI.
+            """,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[destinatario],
+            fail_silently=False,
+        )
+
 
 def solicitar_acceso(request):
     if request.method == 'POST':
         form = SolicitudAccesoForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
-            
             codigo = str(random.randint(100000, 999999))
+            
+            print(f"--> INTENTANDO ENVIAR A: {email}")
+            print(f"--> USANDO CUENTA: {settings.EMAIL_HOST_USER}")
             
             request.session['otp_codigo'] = codigo
             request.session['otp_email'] = email
             
-            send_mail(
-                'Tu Código de Acceso - Buzón EMI',
-                f'Tu código de verificación es: {codigo}\n\nÚsalo para ingresar al sistema de reportes.',
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-            )
+            try:
+                sent = send_mail(
+                    'Tu Código de Acceso - Buzón EMI',
+                    f'Tu código de verificación es: {codigo}\n\nÚsalo para ingresar al sistema de reportes.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                print(f"--> RESULTADO SEND_MAIL: {sent} (1 significa éxito)")
+                
+            except Exception as e:
+                print(f"--> ERROR FATAL ENVIANDO CORREO: {e}")
             
             return redirect('validar_codigo')
     else:
@@ -68,72 +111,17 @@ def crear_queja(request):
             ticket = form.save(commit=False)
             
             email_validado = request.session.get('otp_email')
+            if not email_validado: 
+                email_validado = "error_sesion_perdida"
+
             ticket.usuario_hash = generar_hash_anonimo(email_validado)
             
             ticket.save()
             
             verificar_alertas(ticket)
             
+            
             return redirect('pagina_exito')
-    else:
-        form = TicketForm()
-
-    return render(request, 'tickets/crear_queja.html', {'form': form})
-
-def generar_hash_anonimo(identificador):
-    salt = settings.SECRET_KEY
-    texto_a_hashear = f"{identificador}{salt}"
-    return hashlib.sha256(texto_a_hashear.encode('utf-8')).hexdigest()
-
-def verificar_alertas(ticket):
-
-    texto_completo = f"{ticket.asunto} {ticket.descripcion}".lower()
-    
-    if any(palabra in texto_completo for palabra in PALABRAS_CLAVE):
-        
-        destinatario = ticket.categoria.email_responsable
-        if not destinatario:
-            destinatario = 'admin@emi.edu.bo'
-            
-        print(f"⚠️ ALERTA DETECTADA: Enviando correo a {destinatario}...")
-        
-        send_mail(
-            subject=f'ALERTA URGENTE: {ticket.categoria.nombre} - {ticket.asunto}',
-            message=f"""
-            SE HA REPORTADO UN INCIDENTE CRÍTICO.
-            
-            Categoría: {ticket.categoria.nombre}
-            Prioridad Detectada: MÁXIMA
-            
-            Descripción:
-            {ticket.descripcion}
-            
-            -------------------------------------
-            Este es un mensaje automático del Sistema de Buzón EMI.
-            """,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[destinatario],
-            fail_silently=False,
-        )
-
-def crear_queja(request):
-    if request.method == 'POST':
-        form = TicketForm(request.POST, request.FILES)
-        if form.is_valid():
-            ticket = form.save(commit=False)
-            
-            if request.user.is_authenticated:
-                identificador = request.user.email
-            else:
-                identificador = "usuario_anonimo_demo" 
-            
-            ticket.usuario_hash = generar_hash_anonimo(identificador)
-            ticket.save() 
-            
-            verificar_alertas(ticket)
-            
-            return redirect('pagina_exito') 
-
     else:
         form = TicketForm()
 
