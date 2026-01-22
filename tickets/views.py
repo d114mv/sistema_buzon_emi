@@ -53,30 +53,25 @@ def solicitar_acceso(request):
             email = form.cleaned_data['email']
             codigo = str(random.randint(100000, 999999))
             
-            print(f"--> INTENTANDO ENVIAR A: {email}")
-            print(f"--> USANDO CUENTA: {settings.EMAIL_HOST_USER}")
-            
+            print("="*50)
+            print(f"🔑 CÓDIGO DE ACCESO GENERADO: {codigo}")
+            print("="*50)
+
             request.session['otp_codigo'] = codigo
             request.session['otp_email'] = email
             
             try:
-                sent = send_mail(
+                send_mail(
                     'Tu Código de Acceso - Buzón EMI',
-                    f'Tu código de verificación es: {codigo}\n\nÚsalo para ingresar al sistema de reportes.',
+                    f'Tu código de verificación es: {codigo}',
                     settings.DEFAULT_FROM_EMAIL,
                     [email],
                     fail_silently=False,
                 )
-                print(f"--> RESULTADO SEND_MAIL: {sent} (1 significa éxito)")
-                
             except Exception as e:
-                print(f"--> ERROR FATAL ENVIANDO CORREO: {e}")
+                print(f"Error enviando mail: {e}")
             
             return redirect('validar_codigo')
-    else:
-        form = SolicitudAccesoForm()
-    
-    return render(request, 'tickets/login.html', {'form': form})
 
 def validar_codigo(request):
     if 'otp_email' not in request.session:
