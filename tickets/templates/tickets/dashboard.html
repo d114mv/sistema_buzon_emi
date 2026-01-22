@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Transparencia{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h2 class="fw-bold text-dark">Estado del Sistema EMI</h2>
+        <p class="text-muted">Transparencia en tiempo real sobre la gestión de reportes.</p>
+    </div>
+</div>
+
+<div class="row text-center mb-5">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-white p-3">
+            <h1 class="display-4 fw-bold text-primary">{{ total }}</h1>
+            <span class="text-muted text-uppercase small ls-1">Reportes Totales</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-white p-3">
+            <h1 class="display-4 fw-bold text-success">{{ resueltos }}</h1>
+            <span class="text-muted text-uppercase small ls-1">Problemas Solucionados</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-white p-3">
+            <h1 class="display-4 fw-bold text-warning">{{ en_proceso }}</h1>
+            <span class="text-muted text-uppercase small ls-1">Trabajando Ahora</span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5 mb-4">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-white fw-bold">Distribución de Casos</div>
+            <div class="card-body">
+                <canvas id="miGrafico"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 mb-4">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-white fw-bold">Última Actividad</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Categoría</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in ultimos_tickets %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">{{ ticket.categoria.nombre }}</span>
+                                </td>
+                                <td class="small text-muted">
+                                    {{ ticket.fecha_creacion|date:"d M, H:i" }}
+                                </td>
+                                <td>
+                                    {% if ticket.estado == 'PEND' %}
+                                        <span class="badge bg-danger">Pendiente</span>
+                                    {% elif ticket.estado == 'PROC' %}
+                                        <span class="badge bg-warning text-dark">Revisando</span>
+                                    {% elif ticket.estado == 'RES' %}
+                                        <span class="badge bg-success">Solucionado</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">Aún no hay reportes públicos.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('miGrafico').getContext('2d');
+    const miGrafico = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Resueltos', 'En Proceso', 'Pendientes'],
+            datasets: [{
+                data: [{{ resueltos }}, {{ en_proceso }}, {{ pendientes }}],
+                backgroundColor: [
+                    '#198754',
+                    '#ffc107', 
+                    '#dc3545'  
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

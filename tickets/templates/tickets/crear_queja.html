@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuevo Reporte{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        
+        <div class="card shadow border-0">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 text-center">
+                <h4 class="fw-bold text-secondary">Realizar Reporte</h4>
+                <p class="text-muted small">Tu identidad está protegida criptográficamente.</p>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bi bi-tags"></i> Categoría</label>
+                        {{ form.categoria }}
+                        <div class="form-text">Elige el área responsable.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bi bi-chat-left-text"></i> Asunto Breve</label>
+                        {{ form.asunto }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bi bi-file-text"></i> Descripción Detallada</label>
+                        {{ form.descripcion }}
+                        <div class="form-text">Sé específico. Ubicación, hora, detalles.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bi bi-camera"></i> Evidencia (Opcional)</label>
+                        {{ form.imagen }}
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary-custom btn-lg shadow-sm">
+                            <i class="bi bi-send-fill"></i> Enviar Reporte Seguro
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <small class="text-muted"><i class="bi bi-lock-fill"></i> Conexión Cifrada SSL</small>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
