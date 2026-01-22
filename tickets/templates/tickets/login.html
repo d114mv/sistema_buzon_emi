@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Acceso Estudiantes{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow border-0">
+            <div class="card-body p-4 text-center">
+                <h3 class="fw-bold mb-3">Identificación EMI</h3>
+                <p class="text-muted mb-4">Ingresa tu correo institucional para recibir un código de acceso único.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3 text-start">
+                        {{ form.email.label_tag }}
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2">Enviar Código</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
