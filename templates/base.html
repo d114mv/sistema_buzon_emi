@@ -45,11 +45,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
     
-    <li class="nav-item me-2">
-        <a class="nav-link text-white" href="{% url 'crear_queja' %}">
-            <i class="bi bi-pencil-square"></i> Realizar Reporte
-        </a>
-    </li>
+    
 
     <li class="nav-item me-2">
         <a class="nav-link fw-bold text-warning" href="{% url 'dashboard_publico' %}">
@@ -63,6 +59,12 @@
                 <i class="bi bi-box-arrow-right"></i> Salir
             </a>
         </li>
+
+        <li class="nav-item me-2">
+        <a class="nav-link text-white" href="{% url 'crear_queja' %}">
+            <i class="bi bi-pencil-square"></i> Realizar Reporte
+        </a>
+    </li>
     {% endif %}
 
 </ul>
