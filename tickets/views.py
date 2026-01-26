@@ -9,12 +9,42 @@ from .models import Ticket
 from .forms import TicketForm, SolicitudAccesoForm, ValidarCodigoForm
 
 PALABRAS_CLAVE = ['robo', 'fuego', 'incendio', 'acoso', 'golpe', 'sangre', 'amenaza', 'urgente']
-
+SPAM = []
 
 def generar_hash_anonimo(identificador):
     salt = settings.SECRET_KEY
     texto_a_hashear = f"{identificador}{salt}"
     return hashlib.sha256(texto_a_hashear.encode('utf-8')).hexdigest()
+
+def verificar_spam(ticket):
+    texto_completo = f"{ticket.asunto} {ticket.descripcion}".lower()
+
+    if any(palabra in texto_completo for palabra in SPAM):
+        destinatario = ticket.categoria.email.responsable
+        if not destinatario:
+            destinatario = 'admin@emi.edu.bo'
+
+        print(f"⚠️ SPAM DETECTADO: Enviando correo a {destinatario}...")
+        
+        send_mail(
+            subject=f'ALERTA DE SPAM: {ticket.categoria.nombre} - {ticket.asunto}',
+            message=f"""
+            SE HA REPORTADO UN INTENTO DE SPAM.
+            POR FAVOR INGRESE AL SISTEMA Y ELIMINE EL REPORTE MARCADO COMO SPAM.
+            
+            Categoría: {ticket.categoria.nombre}
+            
+            Descripción:
+            {ticket.descripcion}
+            
+            -------------------------------------
+            Este es un mensaje automático del Sistema de Buzón EMI.
+            """,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[destinatario],
+            fail_silently=False,
+        )
+
 
 def verificar_alertas(ticket):
     texto_completo = f"{ticket.asunto} {ticket.descripcion}".lower()
@@ -119,6 +149,7 @@ def crear_queja(request):
             ticket.save()
             
             verificar_alertas(ticket)
+            verificar_spam(ticket)
             
             return redirect('pagina_exito')
     else:
