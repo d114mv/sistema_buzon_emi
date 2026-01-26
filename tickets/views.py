@@ -9,7 +9,8 @@ from .models import Ticket
 from .forms import TicketForm, SolicitudAccesoForm, ValidarCodigoForm
 
 PALABRAS_CLAVE = ['robo', 'fuego', 'incendio', 'acoso', 'golpe', 'sangre', 'amenaza', 'urgente']
-SPAM = []
+SPAM = ['puta', 'puto', 'pt', 'pta', 'ptm',    'mierda', 'mrd', 'mrda', 'carajo', 'crj',    'coño', 'joder', 'jdr', 'culo', 'klo', 'verga', 'vrg', 'vga', 'pija', 'cabrón', 'cabron', 'cbron', 'pelotudo', 'pelotuda', 'pltd', 'imbécil', 'imbecil', 'imb', 'idiota', 'idio', 'estúpido', 'estupido', 'stpd', 'pendejo', 'pendeja', 'pndj', 'chupa', 'chupala', 'mierdero', 'mamón', 'mamon', 'mmn', 'gil', 'gilazo', 'cojudo', 'cojuda', 'kjd', 'huevón', 'huevon', 'wevon', 'wvon', 'huevada', 'webada', 'wbda', 'cagado', 'cagada', 'cgd', 'zorra', 'perra', 'maldito', 'maldita', 'asqueroso', 'asquerosa', 'hijo de puta', 'hdp', 'la puta', 'lpt']
+
 
 def generar_hash_anonimo(identificador):
     salt = settings.SECRET_KEY
