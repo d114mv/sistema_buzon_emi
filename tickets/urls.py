@@ -9,4 +9,6 @@ urlpatterns = [
     
     path('exito/', views.pagina_exito, name='pagina_exito'),
     path('transparencia/', views.dashboard_publico, name='dashboard_publico'),
+
+    path('salir/', views.cerrar_sesion, name='cerrar_sesion'),
 ]

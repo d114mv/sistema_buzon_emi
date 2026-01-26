@@ -147,3 +147,12 @@ def dashboard_publico(request):
         'ultimos_tickets': ultimos_tickets,
     }
     return render(request, 'tickets/dashboard.html', context)
+
+def cerrar_sesion(request):
+    keys_to_delete = ['es_estudiante_validado', 'otp_email', 'otp_codigo']
+    
+    for key in keys_to_delete:
+        if key in request.session:
+            del request.session[key]
+            
+    return redirect('solicitar_acceso')
