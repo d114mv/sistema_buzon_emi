@@ -153,3 +153,19 @@ JAZZMIN_UI_TWEAKS = {
     "theme": "flatly",
     "sidebar": "sidebar-dark-primary",
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://sistema-buzon-emi.vercel.app', 
+    'https://*.vercel.app',
+]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'core', 'static'), 
+]
