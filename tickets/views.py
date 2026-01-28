@@ -44,7 +44,7 @@ def verificar_alertas(ticket):
     texto_completo = f"{ticket.asunto} {ticket.descripcion}".lower()
     
     if any(palabra in texto_completo for palabra in PALABRAS_CLAVE):
-        destinatario = ticket.categoria.email_responsable or 'admin@emi.edu.bo'
+        destinatario = ticket.categoria.email_responsable or 'dmurielv@est.emi.edu.bo'
         
         asunto = f'ALERTA URGENTE: {ticket.categoria.nombre} - {ticket.asunto}'
         mensaje = f"""
@@ -60,7 +60,7 @@ def verificar_spam(ticket):
     if any(palabra in texto_completo for palabra in SPAM):
         destinatario = ticket.categoria.email.responsable
         if not destinatario:
-            destinatario = 'admin@emi.edu.bo'
+            destinatario = 'dmurielv@est.emi.edu.bo'
 
         print(f"⚠️ SPAM DETECTADO: Enviando correo a {destinatario}...")
         
