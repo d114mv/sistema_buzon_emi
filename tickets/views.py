@@ -90,19 +90,21 @@ def solicitar_acceso(request):
             email = form.cleaned_data['email']
             codigo = str(random.randint(100000, 999999))
             
-            print("="*50)
-            print(f"🔑 CÓDIGO GENERADO: {codigo}") 
-            print("="*50)
-            
             request.session['otp_codigo'] = codigo
             request.session['otp_email'] = email
             
-            EmailThread(
-                'Tu Código de Acceso - Buzón EMI',
-                f'Tu código de verificación es: {codigo}\n\nÚsalo para ingresar al sistema.',
-                settings.DEFAULT_FROM_EMAIL,
-                [email]
-            ).start()
+            try:
+                print(f"--> Intentando enviar correo a {email}...")
+                send_mail(
+                    'Tu Código de Acceso - Buzón EMI',
+                    f'Tu código de verificación es: {codigo}\n\nÚsalo para ingresar al sistema.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                print("--> ¡Correo enviado con éxito!")
+            except Exception as e:
+                print(f"--> ERROR AL ENVIAR CORREO: {e}")
             
             return redirect('validar_codigo')
             
@@ -110,6 +112,7 @@ def solicitar_acceso(request):
         form = SolicitudAccesoForm()
     
     return render(request, 'tickets/login.html', {'form': form})
+
 
 def validar_codigo(request):
     if 'otp_email' not in request.session:
