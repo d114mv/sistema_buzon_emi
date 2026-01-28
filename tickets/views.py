@@ -44,15 +44,27 @@ def verificar_alertas(ticket):
     texto_completo = f"{ticket.asunto} {ticket.descripcion}".lower()
     
     if any(palabra in texto_completo for palabra in PALABRAS_CLAVE):
-        destinatario = ticket.categoria.email_responsable or 'dmurielv@est.emi.edu.bo'
+        campo_emails = ticket.categoria.email_responsable or 'dmurielv@est.emi.edu.bo'
+
+        lista_destinatarios = [email.strip() for email in campo_emails.split(',')]
         
         asunto = f'ALERTA URGENTE: {ticket.categoria.nombre} - {ticket.asunto}'
         mensaje = f"""
-        SE HA REPORTADO UN INCIDENTE CRÍTICO.
+        SE HA REPORTADO UN INCIDENTE.
         Categoría: {ticket.categoria.nombre}
         Descripción: {ticket.descripcion}
         """
-        EmailThread(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [destinatario]).start()
+        try:
+            send_mail(
+                asunto,
+                mensaje,
+                settings.DEFAULT_FROM_EMAIL,
+                lista_destinatarios,
+                fail_silently=False
+            )
+            print(f"--> Alerta enviada a: {lista_destinatarios}")
+        except Exception as e:
+            print(f"--> Error enviando alerta: {e}")
 
 def verificar_spam(ticket):
     texto_completo = f"{ticket.asunto} {ticket.descripcion}".lower()
